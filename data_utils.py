@@ -20,7 +20,7 @@ def tokenize(tokenizer, data, maxlen):
         print('..............Tokenizing...............')
         if tokenizer:
             text = tokenizer.texts_to_sequences(data['text'])
-            text = pad_sequences(text, padding='POST', maxlen=maxlen)
+            text = pad_sequences(text, padding='post', maxlen=maxlen)
             return text
         else:
             tokenizer = Tokenizer(100000)
@@ -31,11 +31,11 @@ def tokenize(tokenizer, data, maxlen):
             print('Tokenizing Time taken : {}s'.format(time() - start))
             vocab_size = len(tokenizer.word_index) + 1
             start = time()
-            train_text = pad_sequences(train_text, padding="POST", maxlen=maxlen)
-            test_text = pad_sequences(test_text, padding="POST", maxlen=maxlen)
+            train_text = pad_sequences(train_text, padding='post', maxlen=maxlen)
+            test_text = pad_sequences(test_text, padding='post', maxlen=maxlen)
             print('Padding Time taken : {}s'.format(time() - start))
             print('========= Done ============')
-            return train_text, test_text, vocab_size
+            return train_text, test_text, vocab_size, tokenizer
     except KeyError as e:
         print("Key Error : ", e)
     except Exception as e:

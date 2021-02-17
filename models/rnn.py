@@ -1,26 +1,23 @@
-# Recurrent Neural Network
-from data_utils import preprocess
-from keras.layers import Embedding, Conv1D, MaxPooling1D, Dense, Dropout, Flatten
+from imports import Embedding, LSTM, Dense, Dropout, Sequential, Flatten
 
 
 class RNN:
-    def __init__(self):
-        if typ === 'new':
-            pass
-        elif type === 'load':
-            pass
-        else:
-            print('Please Specify model type')
-        pass
+    def __init__(self, vocab_size, maxlen):
+        self.type = "RNN"
+        # _input = Input((maxlen, ), dtype='int32')
+        # embedding = Embedding(vocab_size, 100)(_input)
+        # lstm = LSTM(64)(embedding)
+        # dense = Dense(1, activation='sigmoid')(lstm)
+        # self.model = Model(inputs=_input, output=dense)
+        self.model = Sequential()
+        print("Creating Recurrent Sentiment Analytic model")
+        self.model.add(Embedding(vocab_size, 100, input_length=maxlen))
+        self.model.add(LSTM(64, return_sequences=True))
+        self.model.add(Dropout(0.5))
+        self.model.add(Flatten())
+        # self.model.add(LSTM(64))
+        # self.model.add(Dropout(0.5))
+        self.model.add(Dense(1, activation='sigmoid'))
 
-    def create_model(self):
-        pass
-
-    def train(self):
-        pass
-
-    def validate(self):
-        pass
-
-    def prdct(self):
-        pass
+    def init(self):
+        return self.model, self.type
