@@ -5,7 +5,7 @@ def main():
     model = ModelOperation()
     model.input_train_data('data/train.csv')
     model.train_tokenize()
-    nn = RNN(model.vocab_size, model.maxlen)  # RNN - same parameters
+    nn = CNN(model.vocab_size, model.maxlen)  # RNN - same parameters
     nn = nn.init()
     model.create_model(model=nn)
     model.train()

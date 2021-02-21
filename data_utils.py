@@ -42,26 +42,6 @@ def tokenize(tokenizer, data, maxlen):
         print('Unknown error. Tokenizer', e)
 
 
-def _rcll(y_true, y_pred):
-    true_positives = k.sum(k.round(k.clip(y_true * y_pred, 0, 1)))
-    possible_positives = k.sum(k.round(k.clip(y_true, 0, 1)))
-    recall = true_positives / (possible_positives + k.epsilon())
-    return recall
-
-
-def _prcsn(y_true, y_pred):
-    true_positives = k.sum(k.round(k.clip(y_true * y_pred, 0, 1)))
-    predicted_positives = k.sum(k.round(k.clip(y_pred, 0, 1)))
-    precision = true_positives / (predicted_positives + k.epsilon())
-    return precision
-
-
-def _f1(y_true, y_pred):
-    precision = _prcsn(y_true, y_pred)
-    recall = _rcll(y_true, y_pred)
-    return 2 * ((precision * recall) / (precision + recall + k.epsilon()))
-
-
 def plot(hist):
     print('.......Generating Diagramatic Representation.......')
     plt.style.use('ggplot')

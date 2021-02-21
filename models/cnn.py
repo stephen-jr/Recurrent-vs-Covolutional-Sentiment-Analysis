@@ -6,7 +6,7 @@ class CNN:
         self.type = "CNN"
         self.model = Sequential()
         print("Creating Convolutional Sentiment Analytic model")
-        self.model.add(Embedding(vocab_size, 300, input_length=maxlen))
+        self.model.add(Embedding(vocab_size, 200, input_length=maxlen))
         self.model.add(Conv1D(128, 2, activation='relu'))
         self.model.add(MaxPooling1D())
         self.model.add(Conv1D(256, 3, activation='relu'))

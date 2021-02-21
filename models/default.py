@@ -1,5 +1,6 @@
 from data_utils import preprocess, tokenize
-from imports import np, EarlyStopping, pd, train_test_split, dill, os, tm, load_model
+from imports import np, EarlyStopping, pd, train_test_split, dill, \
+    os, tm, load_model, BinaryAccuracy, Precision, Recall, AUC, classification_report
 
 
 class ModelOperation:
@@ -8,7 +9,11 @@ class ModelOperation:
         self.model = None
         self.type = None
         self.X = self.Y = self.X_Test = self.X_Train = self.Y_Train = self.Y_Test = self.tokenizer = None
-        self.vocab_size, self.maxlen = 0, 140
+        self.vocab_size, self.maxlen = 0, 140,
+        self.metrics = [BinaryAccuracy(name="accuracy"),
+                        Recall(name="recall"),
+                        Precision(name="Precision"),
+                        AUC(name="auc")]
 
     def input_train_data(self, dataset):
         if dataset.split('.')[-1] == 'csv':
@@ -35,7 +40,7 @@ class ModelOperation:
     def train_tokenize(self):
         self.X_Train, self.X_Test, self.Y_Train, self.Y_Test = train_test_split(self.X,
                                                                                 self.Y,
-                                                                                test_size=0.25,
+                                                                                test_size=0.30,
                                                                                 random_state=42)
         self.X_Train, self.X_Test, self.vocab_size, self.tokenizer = tokenize(tokenizer=None, data={
             'train_text': self.X_Train,
@@ -46,7 +51,7 @@ class ModelOperation:
         print("Creating Sentiment Analytic model")
         self.model = model[0]
         self.type = model[1]
-        self.model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy'])
+        self.model.compile(optimizer='adam', loss='binary_crossentropy', metrics=self.metrics)
         self.model.summary()
 
     def ld_model(self, pth):
@@ -72,32 +77,27 @@ class ModelOperation:
                                  validation_data=(self.X_Test, self.Y_Test),
                                  batch_size=128,
                                  callbacks=[es])
-        _, train_accuracy = self.model.evaluate(self.X_Train, self.Y_Train, verbose=True)
+        _, train_accuracy, train_precision, train_recall, train_auc = self.model.evaluate(self.X_Train,
+                                                                                          self.Y_Train,
+                                                                                          verbose=True)
         print("\nTraining metrics : ")
-        print(f'Accuracy : {train_accuracy:{5}} \n')
-        #       f'Precision : {train_precision:{5}} \n'
-        #       f'Recall : {train_recall:{5}} \n'
-        #       f'F-Score : {train_fscore:{5}} \n')
-        # print("=============Done==========\n")
+        print(f'Accuracy : {train_accuracy:{5}} \n'
+              f'Precision : {train_precision:{5}} \n'
+              f'Recall : {train_recall:{5}} \n'
+              f'AUC : {train_auc:{5}} \n')
+        print("=============Done==========\n")
         print(".............Validating model..............")
-        # _, test_accuracy, test_precision, test_recall, test_fscore = self.model.evaluate(self.X_Test,
-        #                                                                                  self.Y_Test,
-        #                                                                                  verbose=True)
-        _, test_accuracy = self.model.evaluate(self.X_Train, self.Y_Train, verbose=True)
-
-        print("\nTesting metrics : ")
-        print(f'Accuracy : {test_accuracy:{5}} \n')
-        #        f'Precision : {test_precision:{5}} \n'
-        #        f'Recall : {test_recall:{5}} \n'
-        #        f'F-Score : {test_fscore:{5}}\n')
+        prediction = self.model.predict(self.X_Test)
+        y_pred = (prediction > 0.5)
+        print(classification_report(self.Y_Test, y_pred))
         print()
         ckpt = tm.gmtime(tm.time())
         ckpt = self.type + '-model-' + str(ckpt[0]) + '-' + str(ckpt[1]) + '-' + str(ckpt[2])
 
-        if os.path.exists('saves/' + ckpt + '.h5'):
-            os.remove('saves/' + ckpt + '.h5')
+        if os.path.exists('saves/' + ckpt):
+            os.remove('saves/' + ckpt)
 
-        self.model.save('saves/' + ckpt + '.h5')
+        self.model.save('saves/' + ckpt)
 
         if os.path.exists('saves/tokenizer.pkl'):
             os.remove('saves/tokenizer.pkl')
